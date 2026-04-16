@@ -20,11 +20,12 @@ jobs:
         uses: actions/setup-python@v5  # Устанавливаем Python
         with:
           python-version: '3.14'  # Указываем версию Python
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Обновляем pip
-          pip install -r requirements.txt  # Устанавливаем зависимости проекта
+          python -m pip install -r requirements.txt  # Устанавливаем зависимости проекта
           playwright install --with-deps  # Устанавливаем Playwright и его зависимости
 
       - name: Run UI tests with pytest and generate Allure results
@@ -60,11 +61,12 @@ jobs:
           path: allure-results  # Путь куда распаковать
 
       - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@v1.12  # Генерируем Allure-отчёт
-        if: always()  # Выполняем даже при ошибке
-        with:
-          allure_results: allure-results  # Путь к результатам
-          allure_history: allure-history  # Папка с историей отчётов (для графиков и сравнения)
+          uses: andgineer/allure-report@v3
+          if: always() # Выполняем даже при ошибке
+          with:
+            allure-results: allure-results # Путь к результатам
+            allure-report: allure-report
+            allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)          
 
       - name: Deploy report to Github Pages
         if: always()  # Выполняем даже если предыдущие шаги упали
