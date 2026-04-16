@@ -61,12 +61,12 @@ jobs:
           path: allure-results  # Путь куда распаковать
 
       - name: Allure Report action from marketplace
-          uses: andgineer/allure-report@v3
-          if: always() # Выполняем даже при ошибке
-          with:
-            allure-results: allure-results # Путь к результатам
-            allure-report: allure-report
-            allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)          
+        uses: andgineer/allure-report@v3
+        if: always() # Выполняем даже при ошибке
+        with:
+          allure-results: allure-results # Путь к результатам
+          allure-report: allure-report
+          allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)          
 
       - name: Deploy report to Github Pages
         if: always()  # Выполняем даже если предыдущие шаги упали
