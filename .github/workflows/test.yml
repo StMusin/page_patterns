@@ -60,6 +60,12 @@ jobs:
           name: allure-results  # Имя артефакта
           path: allure-results  # Путь куда распаковать
 
+      - name: Copy history
+        run: |
+          if [ -d gh-pages/allure-history ]; then
+            cp -r gh-pages/allure-history allure-results/history
+          fi
+
       - name: Allure Report action from marketplace
         uses: andgineer/allure-report@v3
         if: always() # Выполняем даже при ошибке
