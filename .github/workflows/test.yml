@@ -74,10 +74,10 @@ jobs:
           allure-report: allure-report
           allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)     
 
-      - name: Prepare report structure
+      - name: Debug files
         run: |
-          mkdir -p public/builds/tests/${{ github.run_number }}
-          cp -r allure-history/* public/builds/tests/${{ github.run_number }}/     
+          echo "==== LS ROOT ===="
+          ls -R
 
       - name: Deploy report to Github Pages
         if: always()  # Выполняем даже если предыдущие шаги упали
@@ -85,4 +85,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}  # Используем встроенный GitHub токен
           publish_branch: gh-pages  # Ветка для публикации отчёта
-          publish_dir: public  # Папка с готовым HTML отчётом
+          publish_dir: allure-report  # Папка с готовым HTML отчётом
