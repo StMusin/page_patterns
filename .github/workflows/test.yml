@@ -19,7 +19,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5  # Устанавливаем Python
         with:
-          python-version: '3.14'  # Указываем версию Python
+          python-version: '3.12'  # Указываем версию Python
           cache: 'pip'
 
       - name: Install dependencies
@@ -72,7 +72,12 @@ jobs:
         with:
           allure-results: allure-results # Путь к результатам
           allure-report: allure-report
-          allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)          
+          allure-history: allure-history # Папка с историей отчётов (для графиков и сравнения)     
+
+      - name: Prepare report structure
+        run: |
+          mkdir -p public/builds/tests/${{ github.run_number }}
+          cp -r allure-history/* public/builds/tests/${{ github.run_number }}/     
 
       - name: Deploy report to Github Pages
         if: always()  # Выполняем даже если предыдущие шаги упали
@@ -80,4 +85,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}  # Используем встроенный GitHub токен
           publish_branch: gh-pages  # Ветка для публикации отчёта
-          publish_dir: allure-history  # Папка с готовым HTML отчётом
+          publish_dir: public  # Папка с готовым HTML отчётом
