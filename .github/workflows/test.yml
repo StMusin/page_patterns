@@ -42,27 +42,27 @@ jobs:
           path: allure-results
 
   publish-report:
-  if: always()
-  needs: run-tests
-  runs-on: ubuntu-latest
+    if: always()
+    needs: run-tests
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Download Allure results
-      uses: actions/download-artifact@v4
-      with:
-        name: allure-results
-        path: allure-results
+    steps:
+      - name: Download Allure results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
 
-    - name: Generate Allure report
-      uses: andgineer/allure-report@v3
-      with:
-        allure-results: allure-results
-        allure-report: allure-report
+      - name: Generate Allure report
+        uses: andgineer/allure-report@v3
+        with:
+          allure-results: allure-results
+          allure-report: allure-report
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: allure-report
-        force_orphan: true
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
+          force_orphan: true
