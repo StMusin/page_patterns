@@ -53,16 +53,17 @@ jobs:
           name: allure-results
           path: allure-results
 
-      - name: Generate Allure report
+      - name: Generate Allure Report
         uses: andgineer/allure-report@v3
         with:
           allure-results: allure-results
-          allure-report: allure-report
+          website: gh-pages-dir
+          reports-site-path: builds/tests
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-report
+          publish_dir: gh-pages-dir
           force_orphan: true
