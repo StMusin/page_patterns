@@ -71,6 +71,11 @@ jobs:
           allure-report: allure-report
           allure-history: history
 
+      - name: Debug report
+        run: |
+          echo "=== ALLURE REPORT ==="
+          ls -R allure-report || echo "NO REPORT"
+
       # Деплой (ВАЖНО: именно allure-report)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
