@@ -80,14 +80,12 @@ jobs:
         with:
           allure-results: allure-results
           allure-report: allure-report
-          allure-history: history
+          allure-history: allure-report/history
 
-      - name: Save history
+      - name: Debug report
         run: |
-          if [ -d history ]; then
-            mkdir -p allure-report/history
-            cp -r history/* allure-report/history/
-          fi
+          echo "=== allure-report ==="
+          ls -R allure-report || true
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -95,3 +93,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-report
+
+      - name: Debug gh-pages after deploy
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+          ls -R
