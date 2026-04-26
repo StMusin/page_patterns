@@ -13,6 +13,8 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
@@ -47,23 +49,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results
           path: allure-results
+        
+      - name: Debug history
+        run: |
+          echo "=== gh-pages ==="
+          ls -R gh-pages || true
+          echo "=== allure-results ==="
+          ls -R allure-results || true
+        
+      - name: Load history
+        run: |
+          if [ -d gh-pages/history ]; then
+            mkdir -p allure-results/history
+            cp -r gh-pages/history/* allure-results/history/
+          fi
 
       - name: Generate Allure Report
         uses: andgineer/allure-report@v3
         with:
           allure-results: allure-results
-          website: gh-pages-dir
-          reports-site-path: builds/tests
+          allure-report: allure-report
+          allure-history: history
+
+      - name: Save history
+        run: |
+          if [ -d history ]; then
+            mkdir -p allure-report/history
+            cp -r history/* allure-report/history/
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: gh-pages-dir
-          force_orphan: true
+          publish_dir: allure-report
