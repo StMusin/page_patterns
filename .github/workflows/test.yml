@@ -80,7 +80,14 @@ jobs:
         with:
           allure-results: allure-results
           allure-report: allure-report
-          allure-history: allure-report/history
+          allure-history: history
+
+      - name: Merge history into report
+        run: |
+          if [ -d history ]; then
+            mkdir -p allure-report/history
+            cp -r history/* allure-report/history/
+          fi
 
       - name: Debug report
         run: |
@@ -96,6 +103,5 @@ jobs:
 
       - name: Debug gh-pages after deploy
         run: |
-          git fetch origin gh-pages
-          git checkout gh-pages
+          cd gh-pages
           ls -R
