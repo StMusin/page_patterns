@@ -65,8 +65,9 @@ jobs:
         uses: andgineer/allure-report@v3  # Генерируем Allure-отчёт
         if: always()  # Выполняем даже при ошибке
         with:
-          allure_results: allure-results  # Путь к результатам
-          allure_history: allure-history  # Папка с историей отчётов (для графиков и сравнения)
+          allure-results: allure-results
+          allure-report: allure-report
+          allure-history: allure-history  # Папка с историей отчётов (для графиков и сравнения)
 
       - name: Deploy report to Github Pages
         if: always()  # Выполняем даже если предыдущие шаги упали
