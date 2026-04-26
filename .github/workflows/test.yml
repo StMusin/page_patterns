@@ -62,7 +62,7 @@ jobs:
           path: allure-results  # Путь куда распаковать
 
       - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@v1.12  # Генерируем Allure-отчёт
+        uses: andgineer/allure-report@v3  # Генерируем Allure-отчёт
         if: always()  # Выполняем даже при ошибке
         with:
           allure_results: allure-results  # Путь к результатам
