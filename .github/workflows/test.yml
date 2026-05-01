@@ -49,21 +49,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Забираем ветку с прошлым отчётом (для history)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
-      # 2. Скачиваем результаты тестов
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results
           path: allure-results
 
-      # 3. Подмешиваем историю из предыдущего деплоя
       - name: Load history
         run: |
           if [ -d gh-pages/history ]; then
@@ -71,15 +68,13 @@ jobs:
             cp -r gh-pages/history/* allure-results/history/
           fi
 
-      # 4. Генерация HTML отчёта + новая history
       - name: Generate Allure report
         uses: andgineer/allure-report@v3
         with:
-          allure-results: allure-results
-          allure-report: allure-report
-          allure-history: history
+          allure_results: allure-results
+          allure_report: allure-report
+          allure_history: history
 
-      # 5. Кладём history внутрь итогового сайта (обязательно для трендов)
       - name: Attach history to report
         run: |
           if [ -d history ]; then
@@ -87,7 +82,11 @@ jobs:
             cp -r history/* allure-report/history/
           fi
 
-      # 6. Деплой в GitHub Pages (жёстко перезаписываем ветку)
+      - name: Debug report
+        run: |
+          echo "=== allure-report ==="
+          ls -R allure-report || true
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
