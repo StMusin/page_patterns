@@ -49,49 +49,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Забираем текущий сайт (gh-pages) — это источник history
+      # 1) Забираем gh-pages (если ветка пустая — шаг не упадёт)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
+        continue-on-error: true
 
-      # 2. Скачиваем результаты тестов
+      # 2) Скачиваем результаты тестов
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results
           path: allure-results
 
-      # 3. Генерация отчёта с УЧЁТОМ старого сайта
-      - name: Generate Allure report with history
-        uses: andgineer/allure-report@v3
-        with:
-          allure-results: allure-results
-
-          # КРИТИЧНО: передаём старый сайт
-          website: gh-pages
-
-          # куда генерить новый сайт
-          reports-site: gh-pages-dir
-          reports-site-path: builds/tests
-
-          # ссылка на сайт (нужно для корректных трендов)
-          website-url: https://stmusin.github.io/page_patterns
-
-          max-reports: 20
-
-      # 4. Проверка
-      - name: Debug generated site
+      # 3) Подмешиваем прошлую history (если есть)
+      - name: Load history
         run: |
-          echo "=== gh-pages-dir ==="
-          ls -R gh-pages-dir || true
+          if [ -d gh-pages/history ]; then
+            mkdir -p allure-results/history
+            cp -r gh-pages/history/* allure-results/history/
+          fi
 
-      # 5. Деплой
+      # 4) Устанавливаем Java и Allure CLI
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Allure CLI
+        run: |
+          curl -sLo allure.tgz https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.tgz
+          tar -xzf allure.tgz
+          echo "$PWD/allure-2.29.0/bin" >> $GITHUB_PATH
+
+      # 5) Генерация HTML-отчёта (в корень сайта)
+      - name: Generate Allure report
+        run: |
+          allure generate allure-results --clean -o site
+
+      # 6) Сохраняем history внутрь сайта
+      - name: Save history
+        run: |
+          if [ -d allure-results/history ]; then
+            mkdir -p site/history
+            cp -r allure-results/history/* site/history/
+          fi
+
+      # 7) Проверка, что есть index.html
+      - name: Debug site
+        run: |
+          echo "=== site ==="
+          ls -R site
+
+      # 8) Деплой в gh-pages (жёстко перезаписываем)
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: gh-pages-dir
+          publish_dir: site
           force_orphan: true
