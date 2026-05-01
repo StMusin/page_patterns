@@ -49,7 +49,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Забираем gh-pages (если есть)
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
@@ -57,14 +56,13 @@ jobs:
           path: gh-pages
         continue-on-error: true
 
-      # 2. Результаты тестов
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results
           path: allure-results
 
-      # 3. Подмешиваем историю
+      #  переносим history ДО генерации
       - name: Load history
         run: |
           if [ -d gh-pages/history ]; then
@@ -72,7 +70,6 @@ jobs:
             cp -r gh-pages/history/* allure-results/history/
           fi
 
-      # 4. Java + Allure CLI
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -85,26 +82,17 @@ jobs:
           tar -xzf allure.tgz
           echo "$PWD/allure-2.29.0/bin" >> $GITHUB_PATH
 
-      # 5. Генерация отчёта (ВАЖНО: в папку site)
       - name: Generate report
         run: |
           allure generate allure-results --clean -o site
 
-      # 6. Сохраняем history внутрь сайта
-      - name: Save history
-        run: |
-          if [ -d allure-results/history ]; then
-            mkdir -p site/history
-            cp -r allure-results/history/* site/history/
-          fi
+      # ❌ НИКАКИХ копирований history после этого шага
 
-      # 7. Проверка (должен быть index.html)
       - name: Debug site
         run: |
           echo "=== SITE ==="
           ls -R site
 
-      # 8. Деплой
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
