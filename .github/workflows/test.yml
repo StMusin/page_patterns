@@ -43,38 +43,55 @@ jobs:
           name: allure-results
           path: allure-results
 
-  publish-report:  # Джоб для публикации отчёта
-    if: always()  # Джоба будет выполнена вне зависимости от успеха или неуспеха run-tests
-    needs: [ run-tests ]  # Выполняется после успешного (или завершённого) run-tests
-    runs-on: ubuntu-latest  # Тоже запускается в Ubuntu
+  publish-report:
+    if: always()
+    needs: [ run-tests ]
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4  # Клонируем репозиторий
+      # 1. Забираем ветку с прошлым отчётом (для history)
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
         with:
-          ref: gh-pages  # Клонируем ветку gh-pages
-          path: gh-pages  # Указываем путь, куда клонировать
+          ref: gh-pages
+          path: gh-pages
 
+      # 2. Скачиваем результаты тестов
       - name: Download Allure results
-        uses: actions/download-artifact@v4  # Загружаем ранее загруженные результаты
+        uses: actions/download-artifact@v4
         with:
-          name: allure-results  # Имя артефакта
-          path: allure-results  # Путь куда распаковать
+          name: allure-results
+          path: allure-results
 
-      - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@master
-        if: always()
-        id: allure-report
-        with:
-          allure_results: build/allure-results
-          gh_pages: gh-pages
-          allure_report: allure-report
-          allure_history: allure-history
+      # 3. Подмешиваем историю из предыдущего деплоя
+      - name: Load history
+        run: |
+          if [ -d gh-pages/history ]; then
+            mkdir -p allure-results/history
+            cp -r gh-pages/history/* allure-results/history/
+          fi
 
-      - name: Deploy report to Github Pages
-        if: always()  # Выполняем даже если предыдущие шаги упали
-        uses: peaceiris/actions-gh-pages@v4  # Деплой на GitHub Pages
+      # 4. Генерация HTML отчёта + новая history
+      - name: Generate Allure report
+        uses: andgineer/allure-report@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Используем встроенный GitHub токен
-          publish_branch: gh-pages  # Ветка для публикации отчёта
-          publish_dir: allure-history  # Папка с готовым HTML отчётом
+          allure-results: allure-results
+          allure-report: allure-report
+          allure-history: history
+
+      # 5. Кладём history внутрь итогового сайта (обязательно для трендов)
+      - name: Attach history to report
+        run: |
+          if [ -d history ]; then
+            mkdir -p allure-report/history
+            cp -r history/* allure-report/history/
+          fi
+
+      # 6. Деплой в GitHub Pages (жёстко перезаписываем ветку)
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
+          force_orphan: true
