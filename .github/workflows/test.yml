@@ -49,36 +49,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout gh-pages (для history сайта)
+      # 1. Забираем текущий сайт (gh-pages) — это источник history
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
 
-      # 2. Скачать результаты тестов
+      # 2. Скачиваем результаты тестов
       - name: Download Allure results
         uses: actions/download-artifact@v4
         with:
           name: allure-results
           path: allure-results
 
-      # 3. Генерация отчёта (ВАЖНО: правильные параметры)
-      - name: Generate Allure report
+      # 3. Генерация отчёта с УЧЁТОМ старого сайта
+      - name: Generate Allure report with history
         uses: andgineer/allure-report@v3
         with:
           allure-results: allure-results
-          website: gh-pages-dir
+
+          # КРИТИЧНО: передаём старый сайт
+          website: gh-pages
+
+          # куда генерить новый сайт
+          reports-site: gh-pages-dir
           reports-site-path: builds/tests
+
+          # ссылка на сайт (нужно для корректных трендов)
+          website-url: https://stmusin.github.io/page_patterns
+
           max-reports: 20
 
-      # 4. Debug (чтобы видеть структуру)
+      # 4. Проверка
       - name: Debug generated site
         run: |
           echo "=== gh-pages-dir ==="
           ls -R gh-pages-dir || true
 
-      # 5. Деплой всего сайта
+      # 5. Деплой
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
