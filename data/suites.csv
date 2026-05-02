@@ -1,0 +1,2 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Sat May 02 10:56:05 UTC 2026","Sat May 02 10:56:07 UTC 2026","2145","tests","test_registration","TestRegistration","","","Successful registration",""
